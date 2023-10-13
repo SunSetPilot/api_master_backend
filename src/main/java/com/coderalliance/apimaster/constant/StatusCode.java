@@ -8,9 +8,7 @@ public enum StatusCode {
     ERROR(500),
     BAD_REQUEST(400),
     UNAUTHORIZED(401),
-    FORBIDDEN(403),
-    IS_YES(1),
-    IS_NO(0);
+    FORBIDDEN(403);
 
     private final int code;
 
