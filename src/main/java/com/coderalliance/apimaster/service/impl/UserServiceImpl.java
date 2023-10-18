@@ -45,31 +45,51 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserInfoResp getUserById(Long id) {
         User user = userMapper.selectById(id);
-        return UserInfoResp.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build();
+        if (user == null) {
+            return null;
+        } else {
+            return UserInfoResp.builder()
+                    .id(user.getId())
+                    .name(user.getName())
+                    .email(user.getEmail())
+                    .build();
+        }
     }
 
     @Override
-    public void createUser(CreateUserReq req) {
-        User user = User.builder()
-                .name(req.getUserName())
-                .email(req.getUserEmail())
-                .password(DigestUtils.md5DigestAsHex(req.getUserPassword().getBytes()))
-                .build();
-        userMapper.insert(user);
+    public Boolean createUser(CreateUserReq req) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(User::getEmail, req.getUserEmail());
+        User existUser = userMapper.selectOne(queryWrapper);
+        if (existUser != null) {
+            return false;
+        } else {
+            User newUser = User.builder()
+                    .name(req.getUserName())
+                    .email(req.getUserEmail())
+                    .password(DigestUtils.md5DigestAsHex(req.getUserPassword().getBytes()))
+                    .build();
+            userMapper.insert(newUser);
+            return true;
+        }
     }
 
     @Override
-    public void updateUser(Long id, CreateUserReq req) {
-        User user = User.builder()
-                .id(id)
-                .name(req.getUserName())
-                .email(req.getUserEmail())
-                .password(DigestUtils.md5DigestAsHex(req.getUserPassword().getBytes()))
-                .build();
-        userMapper.updateById(user);
+    public Boolean updateUser(Long id, CreateUserReq req, String currentUserEmail) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(User::getEmail, currentUserEmail);
+        User currentUser = userMapper.selectOne(queryWrapper);
+        if (currentUser != null && currentUser.getId().equals(id)) {
+            User user = User.builder()
+                    .id(id)
+                    .name(req.getUserName())
+                    .email(req.getUserEmail())
+                    .password(DigestUtils.md5DigestAsHex(req.getUserPassword().getBytes()))
+                    .build();
+            userMapper.updateById(user);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

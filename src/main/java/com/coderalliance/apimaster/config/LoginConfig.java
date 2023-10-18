@@ -13,7 +13,8 @@ public class LoginConfig implements WebMvcConfigurer {
         InterceptorRegistration registration = registry.addInterceptor(new UserLoginInterceptor());
         registration.addPathPatterns("/**");
         registration.excludePathPatterns(
-                "/user/login"
+                "/user/login",
+                "/user/register"
         );
     }
 }

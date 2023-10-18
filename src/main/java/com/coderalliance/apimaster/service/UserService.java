@@ -9,6 +9,6 @@ public interface UserService {
     Boolean login(String email, String password);
     List<UserInfoResp> getAllUser();
     UserInfoResp getUserById(Long id);
-    void createUser(CreateUserReq req);
-    void updateUser(Long id, CreateUserReq req);
+    Boolean createUser(CreateUserReq req);
+    Boolean updateUser(Long id, CreateUserReq req, String currentUserEmail);
 }
