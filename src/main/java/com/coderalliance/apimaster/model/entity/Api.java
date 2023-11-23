@@ -27,6 +27,7 @@ public class Api {
     private Map<String, Object> headerParams;
     @TableField(value = "query_params", typeHandler = JacksonTypeHandler.class)
     private Map<String, Object> queryParams;
-    @TableField(value = "body_params", typeHandler = JacksonTypeHandler.class)
-    private Map<String, Object> bodyParams;
+    @TableField(value = "body_params")
+    private String bodyParams;
+    private String response;
 }
