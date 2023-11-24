@@ -2,6 +2,8 @@ package com.coderalliance.apimaster.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.coderalliance.apimaster.dao.UserMapper;
+import com.coderalliance.apimaster.exception.BusinessException;
+import com.coderalliance.apimaster.exception.PermissionException;
 import com.coderalliance.apimaster.model.entity.User;
 import com.coderalliance.apimaster.model.vo.req.CreateUserReq;
 import com.coderalliance.apimaster.model.vo.resq.UserInfoResp;
@@ -20,15 +22,12 @@ public class UserServiceImpl implements UserService {
     UserMapper userMapper;
 
     @Override
-    public Boolean login(String email, String password) {
+    public void login(String email, String password) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(User::getEmail, email);
         User user = userMapper.selectOne(queryWrapper);
-        if (user == null) {
-            return false;
-        } else {
-            String passwordMd5 = DigestUtils.md5DigestAsHex(password.getBytes());
-            return user.getPassword().equals(passwordMd5);
+        if (user == null || !user.getPassword().equals(DigestUtils.md5DigestAsHex(password.getBytes()))) {
+            throw new PermissionException("wrong email or password!");
         }
     }
 
@@ -46,7 +45,7 @@ public class UserServiceImpl implements UserService {
     public UserInfoResp getUserById(Long id) {
         User user = userMapper.selectById(id);
         if (user == null) {
-            return null;
+            throw new BusinessException("user not exist!");
         } else {
             return UserInfoResp.builder()
                     .id(user.getId())
@@ -57,12 +56,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean createUser(CreateUserReq req) {
+    public void createUser(CreateUserReq req) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(User::getEmail, req.getUserEmail());
         User existUser = userMapper.selectOne(queryWrapper);
         if (existUser != null) {
-            return false;
+            throw new BusinessException("user already exist!");
         } else {
             User newUser = User.builder()
                     .name(req.getUserName())
@@ -70,12 +69,11 @@ public class UserServiceImpl implements UserService {
                     .password(DigestUtils.md5DigestAsHex(req.getUserPassword().getBytes()))
                     .build();
             userMapper.insert(newUser);
-            return true;
         }
     }
 
     @Override
-    public Boolean updateUser(Long id, CreateUserReq req, String currentUserEmail) {
+    public void updateUser(Long id, CreateUserReq req, String currentUserEmail) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(User::getEmail, currentUserEmail);
         User currentUser = userMapper.selectOne(queryWrapper);
@@ -87,9 +85,8 @@ public class UserServiceImpl implements UserService {
                     .password(DigestUtils.md5DigestAsHex(req.getUserPassword().getBytes()))
                     .build();
             userMapper.updateById(user);
-            return true;
         } else {
-            return false;
+            throw new PermissionException("can not update other user!");
         }
     }
 }

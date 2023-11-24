@@ -9,11 +9,11 @@ import java.util.List;
 public interface ApiService {
     List<ApiListResp> getApiList(Long projectId);
 
-    Boolean createApi(CreateApiReq req);
+    void createApi(Long project_id, CreateApiReq req);
 
-    Boolean updateApi(Long apiId, CreateApiReq req);
+    void updateApi(Long apiId, CreateApiReq req);
 
-    Boolean deleteApi(Long apiId);
+    void deleteApi(Long apiId);
 
-    Boolean batchImportApi(BatchImportApiReq req);
+    void batchImportApi(BatchImportApiReq req);
 }

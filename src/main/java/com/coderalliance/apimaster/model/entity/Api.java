@@ -9,7 +9,6 @@ import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Map;
 
 @Data
 @Builder
@@ -24,9 +23,9 @@ public class Api {
     private String path;
     private String protocol;
     @TableField(value = "header_params", typeHandler = JacksonTypeHandler.class)
-    private Map<String, Object> headerParams;
+    private Object headerParams;
     @TableField(value = "query_params", typeHandler = JacksonTypeHandler.class)
-    private Map<String, Object> queryParams;
+    private Object queryParams;
     @TableField(value = "body_params")
     private String bodyParams;
     private String response;
