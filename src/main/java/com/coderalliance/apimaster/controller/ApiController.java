@@ -1,16 +1,21 @@
 package com.coderalliance.apimaster.controller;
 
+import com.coderalliance.apimaster.constant.StatusCode;
 import com.coderalliance.apimaster.exception.BusinessException;
+import com.coderalliance.apimaster.exception.PermissionException;
+import com.coderalliance.apimaster.model.entity.Api;
 import com.coderalliance.apimaster.model.vo.BaseResponse;
 import com.coderalliance.apimaster.model.vo.req.BatchImportApiReq;
 import com.coderalliance.apimaster.model.vo.req.CreateApiReq;
 import com.coderalliance.apimaster.model.vo.resq.ApiListResp;
 import com.coderalliance.apimaster.service.ApiService;
+import com.coderalliance.apimaster.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -21,12 +26,18 @@ public class ApiController {
     @Autowired
     private ApiService apiService;
 
-    // todo check permission
-    @GetMapping("/{project_id}")
-    public BaseResponse<List<ApiListResp>> getApiList(@PathVariable Long project_id) {
+    @Autowired
+    private PermissionService permissionService;
+
+    @GetMapping("/{projectId}")
+    public BaseResponse<List<ApiListResp>> getApiList(@PathVariable Long projectId, HttpServletRequest request) {
         try {
-            return BaseResponse.success(apiService.getApiList(project_id));
-        } catch (BusinessException e) {
+            Long currentUserId = (Long) request.getSession().getAttribute("userId");
+            permissionService.checkProjectPermission(projectId, currentUserId);
+            return BaseResponse.success(apiService.getApiList(projectId));
+        } catch (PermissionException e){
+            return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
+        }catch (BusinessException e) {
             return BaseResponse.error(e.getMessage());
         } catch (Exception e) {
             log.error("get api list error: ", e);
@@ -34,11 +45,15 @@ public class ApiController {
         }
     }
 
-    @PostMapping("/{project_id}")
-    public BaseResponse<Boolean> createApi(@PathVariable Long project_id, @Validated @RequestBody CreateApiReq req) {
+    @PostMapping("/{projectId}")
+    public BaseResponse<Boolean> createApi(@PathVariable Long projectId, @Validated @RequestBody CreateApiReq req, HttpServletRequest request) {
         try {
-            apiService.createApi(project_id, req);
+            Long currentUserId = (Long) request.getSession().getAttribute("userId");
+            permissionService.checkProjectPermission(projectId, currentUserId);
+            apiService.createApi(projectId, req);
             return BaseResponse.success();
+        } catch (PermissionException e){
+            return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
         } catch (BusinessException e) {
             return BaseResponse.error(e.getMessage());
         } catch (Exception e) {
@@ -47,11 +62,16 @@ public class ApiController {
         }
     }
 
-    @PutMapping("/{api_id}")
-    public BaseResponse<Boolean> updateApi(@PathVariable Long api_id, @Validated @RequestBody CreateApiReq req) {
+    @PutMapping("/{apiId}")
+    public BaseResponse<Boolean> updateApi(@PathVariable Long apiId, @Validated @RequestBody CreateApiReq req, HttpServletRequest request) {
         try {
-            apiService.updateApi(api_id, req);
+            Long currentUserId = (Long) request.getSession().getAttribute("userId");
+            Api oldApi = apiService.getApi(apiId);
+            permissionService.checkProjectPermission(oldApi.getProjectId(), currentUserId);
+            apiService.updateApi(oldApi, req);
             return BaseResponse.success();
+        } catch (PermissionException e){
+            return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
         } catch (BusinessException e) {
             return BaseResponse.error(e.getMessage());
         }catch (Exception e) {
@@ -60,11 +80,16 @@ public class ApiController {
         }
     }
 
-    @DeleteMapping("/{api_id}")
-    public BaseResponse<Boolean> deleteApi(@PathVariable Long api_id) {
+    @DeleteMapping("/{apiId}")
+    public BaseResponse<Boolean> deleteApi(@PathVariable Long apiId, HttpServletRequest request) {
         try {
-            apiService.deleteApi(api_id);
+            Long currentUserId = (Long) request.getSession().getAttribute("userId");
+            Api oldApi = apiService.getApi(apiId);
+            permissionService.checkProjectPermission(oldApi.getProjectId(), currentUserId);
+            apiService.deleteApi(oldApi);
             return BaseResponse.success();
+        } catch (PermissionException e){
+            return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
         } catch (BusinessException e) {
             return BaseResponse.error(e.getMessage());
         } catch (Exception e) {
@@ -74,10 +99,14 @@ public class ApiController {
     }
 
     @PostMapping("/import")
-    public BaseResponse<Boolean> batchImportApi(@Validated @RequestBody BatchImportApiReq req) {
+    public BaseResponse<Boolean> batchImportApi(@Validated @RequestBody BatchImportApiReq req, HttpServletRequest request) {
         try {
+            Long currentUserId = (Long) request.getSession().getAttribute("userId");
+            permissionService.checkProjectPermission(req.getProjectId(), currentUserId);
             apiService.batchImportApi(req);
             return BaseResponse.success();
+        } catch (PermissionException e){
+            return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
         } catch (BusinessException e) {
             return BaseResponse.error(e.getMessage());
         } catch (Exception e) {

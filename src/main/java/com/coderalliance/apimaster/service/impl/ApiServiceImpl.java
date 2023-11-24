@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class ApiServiceImpl implements ApiService {
 
     @Autowired
-    ApiMapper apiMapper;
+    private ApiMapper apiMapper;
 
     @Override
     public List<ApiListResp> getApiList(Long projectId) {
@@ -39,10 +39,18 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public void createApi(Long project_id, CreateApiReq req) {
-        // todo update project api count
+    public Api getApi(Long apiId) {
+        Api api = apiMapper.selectById(apiId);
+        if (api == null) {
+            throw new BusinessException("api not exist");
+        }
+        return api;
+    }
+
+    @Override
+    public void createApi(Long projectId, CreateApiReq req) {
         Api newApi = Api.builder()
-                .projectId(project_id)
+                .projectId(projectId)
                 .description(req.getDescription())
                 .protocol(req.getProtocol())
                 .path(req.getPath())
@@ -56,13 +64,9 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public void updateApi(Long apiId, CreateApiReq req) {
-        Api oldApi = apiMapper.selectById(apiId);
-        if (oldApi == null) {
-            throw new BusinessException("api not exist!");
-        }
+    public void updateApi(Api oldApi, CreateApiReq req) {
         Api newApi = Api.builder()
-                .id(apiId)
+                .id(oldApi.getId())
                 .projectId(oldApi.getProjectId())
                 .description(req.getDescription())
                 .protocol(req.getProtocol())
@@ -77,13 +81,18 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public void deleteApi(Long apiId) {
-        // todo update project api count
-        apiMapper.deleteById(apiId);
+    public void deleteApi(Api oldApi) {
+        apiMapper.deleteById(oldApi.getId());
     }
 
     @Override
     public void batchImportApi(BatchImportApiReq req) {
-        // todo update project api count
+    }
+
+    @Override
+    public Long countApi(Long projectId) {
+        QueryWrapper<Api> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(Api::getProjectId, projectId);
+        return apiMapper.selectCount(queryWrapper);
     }
 }

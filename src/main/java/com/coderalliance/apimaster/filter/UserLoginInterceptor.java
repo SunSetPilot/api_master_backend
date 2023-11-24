@@ -13,11 +13,11 @@ public class UserLoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession();
-        String userEmail = (String) session.getAttribute("userEmail");
-        if (userEmail != null) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId != null) {
             return true;
         }
-        SendMsgUtil.sendJsonMessage(response, BaseResponse.error(StatusCode.UNAUTHORIZED, "not login!"));
+        SendMsgUtil.sendJsonMessage(response, BaseResponse.error(StatusCode.UNAUTHORIZED, "not login"));
         return false;
     }
 }

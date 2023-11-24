@@ -6,9 +6,9 @@ import com.coderalliance.apimaster.model.vo.resq.UserInfoResp;
 import java.util.List;
 
 public interface UserService {
-    void login(String email, String password);
+    Long login(String email, String password);
     List<UserInfoResp> getAllUser();
     UserInfoResp getUserById(Long id);
-    void createUser(CreateUserReq req);
-    void updateUser(Long id, CreateUserReq req, String currentUserEmail);
+    Long createUser(CreateUserReq req);
+    void updateUser(Long id, CreateUserReq req, Long currentUserId);
 }
