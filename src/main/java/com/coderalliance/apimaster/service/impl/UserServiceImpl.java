@@ -19,16 +19,17 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    UserMapper userMapper;
+    private UserMapper userMapper;
 
     @Override
-    public void login(String email, String password) {
+    public Long login(String email, String password) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(User::getEmail, email);
         User user = userMapper.selectOne(queryWrapper);
         if (user == null || !user.getPassword().equals(DigestUtils.md5DigestAsHex(password.getBytes()))) {
-            throw new PermissionException("wrong email or password!");
+            throw new PermissionException("wrong email or password");
         }
+        return user.getId();
     }
 
     @Override
@@ -45,7 +46,7 @@ public class UserServiceImpl implements UserService {
     public UserInfoResp getUserById(Long id) {
         User user = userMapper.selectById(id);
         if (user == null) {
-            throw new BusinessException("user not exist!");
+            throw new BusinessException("user not exist");
         } else {
             return UserInfoResp.builder()
                     .id(user.getId())
@@ -56,12 +57,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createUser(CreateUserReq req) {
+    public Long createUser(CreateUserReq req) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(User::getEmail, req.getUserEmail());
         User existUser = userMapper.selectOne(queryWrapper);
         if (existUser != null) {
-            throw new BusinessException("user already exist!");
+            throw new BusinessException("user already exist");
         } else {
             User newUser = User.builder()
                     .name(req.getUserName())
@@ -69,15 +70,13 @@ public class UserServiceImpl implements UserService {
                     .password(DigestUtils.md5DigestAsHex(req.getUserPassword().getBytes()))
                     .build();
             userMapper.insert(newUser);
+            return newUser.getId();
         }
     }
 
     @Override
-    public void updateUser(Long id, CreateUserReq req, String currentUserEmail) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(User::getEmail, currentUserEmail);
-        User currentUser = userMapper.selectOne(queryWrapper);
-        if (currentUser != null && currentUser.getId().equals(id)) {
+    public void updateUser(Long id, CreateUserReq req, Long currentUserId) {
+        if (currentUserId.equals(id)) {
             User user = User.builder()
                     .id(id)
                     .name(req.getUserName())
@@ -86,7 +85,7 @@ public class UserServiceImpl implements UserService {
                     .build();
             userMapper.updateById(user);
         } else {
-            throw new PermissionException("can not update other user!");
+            throw new PermissionException("can not update other user");
         }
     }
 }

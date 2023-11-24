@@ -37,9 +37,10 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public BaseResponse<Boolean> createUser(@Validated @RequestBody CreateUserReq req) {
+    public BaseResponse<Boolean> createUser(@Validated @RequestBody CreateUserReq req, HttpServletRequest request) {
         try {
-            userService.createUser(req);
+            Long userId = userService.createUser(req);
+            request.getSession().setAttribute("userId", userId);
             return BaseResponse.success();
         } catch (BusinessException e) {
             return BaseResponse.error(e.getMessage());
@@ -52,11 +53,8 @@ public class UserController {
     @PutMapping("/{id}")
     public BaseResponse<Boolean> updateUser(@PathVariable Long id, @Validated @RequestBody CreateUserReq req, HttpServletRequest request) {
         try {
-            String currentUserEmail = (String) request.getSession().getAttribute("userEmail");
-            userService.updateUser(id, req, currentUserEmail);
-            if (req.getUserEmail() != null) {
-                request.getSession().setAttribute("userEmail", req.getUserEmail());
-            }
+            Long currentUserId = (Long) request.getSession().getAttribute("userId");
+            userService.updateUser(id, req, currentUserId);
             return BaseResponse.success();
         } catch (PermissionException e) {
             return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
@@ -71,8 +69,8 @@ public class UserController {
     @PostMapping("/login")
     public BaseResponse<Boolean> login(@Validated @RequestBody UserLoginReq req, HttpServletRequest request) {
         try {
-            userService.login(req.getEmail(), req.getPassword());
-            request.getSession().setAttribute("userEmail", req.getEmail());
+            Long userId = userService.login(req.getEmail(), req.getPassword());
+            request.getSession().setAttribute("userId", userId);
             return BaseResponse.success();
         } catch (PermissionException e) {
             return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
@@ -87,7 +85,7 @@ public class UserController {
     @GetMapping("/logout")
     public BaseResponse<Boolean> logout(HttpServletRequest request) {
         try {
-            request.getSession().removeAttribute("userEmail");
+            request.getSession().removeAttribute("userId");
             return BaseResponse.success();
         } catch (Exception e) {
             log.error("logout error: ", e);
