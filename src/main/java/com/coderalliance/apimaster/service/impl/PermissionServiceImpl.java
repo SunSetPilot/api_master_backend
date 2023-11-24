@@ -39,4 +39,33 @@ public class PermissionServiceImpl implements PermissionService {
         List<UserProjectPermission> userProjectPermissions = permissionMapper.selectList(queryWrapper);
         return userProjectPermissions.stream().map(UserProjectPermission::getUserId).collect(Collectors.toList());
     }
+
+    @Override
+    public List<Long> getUserProjectIds(Long userId) {
+        QueryWrapper<UserProjectPermission> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(UserProjectPermission::getUserId, userId);
+        List<UserProjectPermission> userProjectPermissions = permissionMapper.selectList(queryWrapper);
+        return userProjectPermissions.stream().map(UserProjectPermission::getProjectId).collect(Collectors.toList());
+    }
+
+    @Override
+    public void updateProjectMembers(Long projectId, List<Long> members) {
+        QueryWrapper<UserProjectPermission> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(UserProjectPermission::getProjectId, projectId);
+        permissionMapper.delete(queryWrapper);
+        members.forEach(member -> {
+            UserProjectPermission userProjectPermission = UserProjectPermission.builder()
+                    .projectId(projectId)
+                    .userId(member)
+                    .build();
+            permissionMapper.insert(userProjectPermission);
+        });
+    }
+
+    @Override
+    public void deleteProjectPermission(Long projectId) {
+        QueryWrapper<UserProjectPermission> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(UserProjectPermission::getProjectId, projectId);
+        permissionMapper.delete(queryWrapper);
+    }
 }

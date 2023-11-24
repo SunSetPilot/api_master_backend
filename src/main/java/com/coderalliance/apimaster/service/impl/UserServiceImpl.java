@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,19 @@ public class UserServiceImpl implements UserService {
                     .email(user.getEmail())
                     .build();
         }
+    }
+
+    @Override
+    public List<UserInfoResp> getUserByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<User> users = userMapper.selectBatchIds(ids);
+        return users.stream().map(user -> UserInfoResp.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .build()).collect(Collectors.toList());
     }
 
     @Override
