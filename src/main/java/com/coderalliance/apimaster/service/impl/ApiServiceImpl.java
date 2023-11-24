@@ -95,4 +95,11 @@ public class ApiServiceImpl implements ApiService {
         queryWrapper.lambda().eq(Api::getProjectId, projectId);
         return apiMapper.selectCount(queryWrapper);
     }
+
+    @Override
+    public void deleteApiByProjectId(Long id) {
+        QueryWrapper<Api> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(Api::getProjectId, id);
+        apiMapper.delete(queryWrapper);
+    }
 }

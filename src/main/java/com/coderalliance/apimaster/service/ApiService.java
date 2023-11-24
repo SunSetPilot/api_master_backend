@@ -21,4 +21,6 @@ public interface ApiService {
     void batchImportApi(BatchImportApiReq req);
 
     Long countApi(Long projectId);
+
+    void deleteApiByProjectId(Long id);
 }

@@ -9,6 +9,7 @@ public interface UserService {
     Long login(String email, String password);
     List<UserInfoResp> getAllUser();
     UserInfoResp getUserById(Long id);
+    List<UserInfoResp> getUserByIds(List<Long> ids);
     Long createUser(CreateUserReq req);
     void updateUser(Long id, CreateUserReq req, Long currentUserId);
 }
