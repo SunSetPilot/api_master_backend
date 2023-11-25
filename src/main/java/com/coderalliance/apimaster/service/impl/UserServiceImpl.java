@@ -6,7 +6,6 @@ import com.coderalliance.apimaster.exception.BusinessException;
 import com.coderalliance.apimaster.exception.PermissionException;
 import com.coderalliance.apimaster.model.entity.User;
 import com.coderalliance.apimaster.model.vo.req.CreateUserReq;
-import com.coderalliance.apimaster.model.vo.resq.UserInfoResp;
 import com.coderalliance.apimaster.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,6 @@ import org.springframework.util.DigestUtils;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -34,40 +32,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserInfoResp> getAllUser() {
-        List<User> users = userMapper.selectList(null);
-        return users.stream().map(user -> UserInfoResp.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build()).collect(Collectors.toList());
+    public List<User> getAllUser() {
+        return userMapper.selectList(null);
     }
 
     @Override
-    public UserInfoResp getUserById(Long id) {
+    public User getUserById(Long id) {
         User user = userMapper.selectById(id);
         if (user == null) {
             throw new BusinessException("user not exist");
         } else {
-            return UserInfoResp.builder()
-                    .id(user.getId())
-                    .name(user.getName())
-                    .email(user.getEmail())
-                    .build();
+            return user;
         }
     }
 
     @Override
-    public List<UserInfoResp> getUserByIds(List<Long> ids) {
+    public List<User> getUserByIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }
-        List<User> users = userMapper.selectBatchIds(ids);
-        return users.stream().map(user -> UserInfoResp.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build()).collect(Collectors.toList());
+        return userMapper.selectBatchIds(ids);
     }
 
     @Override

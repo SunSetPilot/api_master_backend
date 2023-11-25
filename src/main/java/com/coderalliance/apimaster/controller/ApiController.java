@@ -7,6 +7,7 @@ import com.coderalliance.apimaster.model.entity.Api;
 import com.coderalliance.apimaster.model.vo.BaseResponse;
 import com.coderalliance.apimaster.model.vo.req.BatchImportApiReq;
 import com.coderalliance.apimaster.model.vo.req.CreateApiReq;
+import com.coderalliance.apimaster.model.vo.resq.ApiInfoResp;
 import com.coderalliance.apimaster.model.vo.resq.ApiListResp;
 import com.coderalliance.apimaster.service.ApiService;
 import com.coderalliance.apimaster.service.PermissionService;
@@ -17,9 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/apis")
+@RequestMapping("/api")
 @Slf4j
 public class ApiController {
 
@@ -29,12 +31,19 @@ public class ApiController {
     @Autowired
     private PermissionService permissionService;
 
-    @GetMapping("/{projectId}")
+    @GetMapping("/project/{projectId}")
     public BaseResponse<List<ApiListResp>> getApiList(@PathVariable Long projectId, HttpServletRequest request) {
         try {
             Long currentUserId = (Long) request.getSession().getAttribute("userId");
             permissionService.checkProjectPermission(projectId, currentUserId);
-            return BaseResponse.success(apiService.getApiList(projectId));
+            List<ApiListResp> apiList = apiService.getApiList(projectId).stream().map(
+                    api -> ApiListResp.builder()
+                            .id(api.getId())
+                            .description(api.getDescription())
+                            .method(api.getMethod())
+                            .build())
+                    .collect(Collectors.toList());
+            return BaseResponse.success(apiList);
         } catch (PermissionException e){
             return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
         }catch (BusinessException e) {
@@ -45,11 +54,44 @@ public class ApiController {
         }
     }
 
-    @PostMapping("/{projectId}")
-    public BaseResponse<Boolean> createApi(@PathVariable Long projectId, @Validated @RequestBody CreateApiReq req, HttpServletRequest request) {
+    @GetMapping("/{apiId}")
+    public BaseResponse<ApiInfoResp> getApi(@PathVariable Long apiId, HttpServletRequest request) {
         try {
             Long currentUserId = (Long) request.getSession().getAttribute("userId");
-            permissionService.checkProjectPermission(projectId, currentUserId);
+            Api api = apiService.getApi(apiId);
+            permissionService.checkProjectPermission(api.getProjectId(), currentUserId);
+            ApiInfoResp apiInfoResp = ApiInfoResp.builder()
+                    .id(api.getId())
+                    .projectId(api.getProjectId())
+                    .description(api.getDescription())
+                    .protocol(api.getProtocol())
+                    .path(api.getPath())
+                    .method(api.getMethod())
+                    .headerParams(api.getHeaderParams())
+                    .queryParams(api.getQueryParams())
+                    .bodyParams(api.getBodyParams())
+                    .response(api.getResponse())
+                    .build();
+            return BaseResponse.success(apiInfoResp);
+        } catch (PermissionException e){
+            return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
+        }catch (BusinessException e) {
+            return BaseResponse.error(e.getMessage());
+        } catch (Exception e) {
+            log.error("get api error: ", e);
+            return BaseResponse.error("internal server error");
+        }
+    }
+
+    @PostMapping("")
+    public BaseResponse<Boolean> createApi(@Validated @RequestBody CreateApiReq req, HttpServletRequest request) {
+        try {
+            Long currentUserId = (Long) request.getSession().getAttribute("userId");
+            Long projectId = req.getProjectId();
+            if (projectId == null) {
+                throw new BusinessException("project id can not be null");
+            }
+            permissionService.checkProjectPermission(req.getProjectId(), currentUserId);
             apiService.createApi(projectId, req);
             return BaseResponse.success();
         } catch (PermissionException e){

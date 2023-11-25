@@ -8,6 +8,9 @@ import javax.validation.constraints.Size;
 
 @Data
 public class CreateApiReq {
+    @JsonProperty("project_id")
+    private Long projectId;
+
     @NotEmpty(message = "api description can not be empty")
     @Size(max = 512, message = "api description length should be less than 512")
     private String description;

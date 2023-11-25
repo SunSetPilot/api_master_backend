@@ -3,6 +3,7 @@ package com.coderalliance.apimaster.controller;
 import com.coderalliance.apimaster.constant.StatusCode;
 import com.coderalliance.apimaster.exception.BusinessException;
 import com.coderalliance.apimaster.exception.PermissionException;
+import com.coderalliance.apimaster.model.entity.User;
 import com.coderalliance.apimaster.model.vo.BaseResponse;
 import com.coderalliance.apimaster.model.vo.req.CreateUserReq;
 import com.coderalliance.apimaster.model.vo.req.UserLoginReq;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
@@ -27,7 +29,13 @@ public class UserController {
     @GetMapping("/{id}")
     public BaseResponse<UserInfoResp> getUser(@PathVariable Long id) {
         try {
-            return BaseResponse.success(userService.getUserById(id));
+            User user = userService.getUserById(id);
+            UserInfoResp userInfoResp = UserInfoResp.builder()
+                    .id(id)
+                    .name(user.getName())
+                    .email(user.getEmail())
+                    .build();
+            return BaseResponse.success(userInfoResp);
         } catch (BusinessException e) {
             return BaseResponse.error(e.getMessage());
         } catch (Exception e) {
@@ -97,7 +105,14 @@ public class UserController {
     @GetMapping("/all")
     public BaseResponse<List<UserInfoResp>> getAllUser() {
         try {
-            return BaseResponse.success(userService.getAllUser());
+            List<UserInfoResp> userInfoResp = userService.getAllUser().stream().map(
+                    user -> UserInfoResp.builder()
+                            .id(user.getId())
+                            .name(user.getName())
+                            .email(user.getEmail())
+                            .build())
+                    .collect(Collectors.toList());
+            return BaseResponse.success(userInfoResp);
         } catch (BusinessException e) {
             return BaseResponse.error(e.getMessage());
         }

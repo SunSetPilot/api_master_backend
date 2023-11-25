@@ -1,15 +1,14 @@
 package com.coderalliance.apimaster.service;
 
+import com.coderalliance.apimaster.model.entity.Project;
 import com.coderalliance.apimaster.model.vo.req.CreateProjectReq;
-import com.coderalliance.apimaster.model.vo.resq.ProjectInfoResp;
-import com.coderalliance.apimaster.model.vo.resq.ProjectListResp;
 
 import java.util.List;
 
 public interface ProjectService {
-    List<ProjectListResp> getProjectListByIds(List<Long> projectIds);
+    List<Project> getProjectListByIds(List<Long> projectIds);
 
-    ProjectInfoResp getProjectById(Long id);
+    Project getProjectById(Long id);
 
     void createProject(CreateProjectReq req, Long userId);
 
