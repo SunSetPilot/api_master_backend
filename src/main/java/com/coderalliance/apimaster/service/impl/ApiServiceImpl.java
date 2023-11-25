@@ -6,13 +6,11 @@ import com.coderalliance.apimaster.exception.BusinessException;
 import com.coderalliance.apimaster.model.entity.Api;
 import com.coderalliance.apimaster.model.vo.req.BatchImportApiReq;
 import com.coderalliance.apimaster.model.vo.req.CreateApiReq;
-import com.coderalliance.apimaster.model.vo.resq.ApiListResp;
 import com.coderalliance.apimaster.service.ApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ApiServiceImpl implements ApiService {
@@ -21,21 +19,10 @@ public class ApiServiceImpl implements ApiService {
     private ApiMapper apiMapper;
 
     @Override
-    public List<ApiListResp> getApiList(Long projectId) {
+    public List<Api> getApiList(Long projectId) {
         QueryWrapper<Api> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(Api::getProjectId, projectId);
-        List<Api> apis = apiMapper.selectList(queryWrapper);
-        return apis.stream().map(api -> ApiListResp.builder()
-                .id(api.getId())
-                .description(api.getDescription())
-                .protocol(api.getProtocol())
-                .path(api.getPath())
-                .method(api.getMethod())
-                .headerParams(api.getHeaderParams())
-                .queryParams(api.getQueryParams())
-                .bodyParams(api.getBodyParams())
-                .response(api.getResponse())
-                .build()).collect(Collectors.toList());
+        return apiMapper.selectList(queryWrapper);
     }
 
     @Override

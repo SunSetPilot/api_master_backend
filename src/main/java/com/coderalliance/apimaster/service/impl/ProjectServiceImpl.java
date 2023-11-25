@@ -5,18 +5,14 @@ import com.coderalliance.apimaster.exception.BusinessException;
 import com.coderalliance.apimaster.exception.PermissionException;
 import com.coderalliance.apimaster.model.entity.Project;
 import com.coderalliance.apimaster.model.vo.req.CreateProjectReq;
-import com.coderalliance.apimaster.model.vo.resq.ProjectInfoResp;
-import com.coderalliance.apimaster.model.vo.resq.ProjectListResp;
 import com.coderalliance.apimaster.service.ApiService;
 import com.coderalliance.apimaster.service.PermissionService;
 import com.coderalliance.apimaster.service.ProjectService;
-import com.coderalliance.apimaster.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -28,41 +24,23 @@ public class ProjectServiceImpl implements ProjectService {
     private ApiService apiService;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private PermissionService permissionService;
 
     @Override
-    public List<ProjectListResp> getProjectListByIds(List<Long> projectIds) {
+    public List<Project> getProjectListByIds(List<Long> projectIds) {
         if (projectIds == null || projectIds.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Project> projects = projectMapper.selectBatchIds(projectIds);
-        return projects.stream().map(project -> ProjectListResp.builder()
-                .id(project.getId())
-                .name(project.getName())
-                .apiCount(apiService.countApi(project.getId()))
-                .owner(userService.getUserById(project.getOwnerId()).getName())
-                .build()).collect(Collectors.toList());
+        return projectMapper.selectBatchIds(projectIds);
     }
 
     @Override
-    public ProjectInfoResp getProjectById(Long id) {
+    public Project getProjectById(Long id) {
         Project project = projectMapper.selectById(id);
         if (project == null) {
             throw new BusinessException("project not exist");
         }
-        return ProjectInfoResp.builder()
-                .id(project.getId())
-                .name(project.getName())
-                .apiCount(apiService.countApi(project.getId()))
-                .owner(userService.getUserById(project.getOwnerId()).getName())
-                .members(permissionService.getProjectMemberIds(project.getId()))
-                .autoImport(project.getAutoImport())
-                .gitAddress(project.getGitAddress())
-                .gitBranch(project.getGitBranch())
-                .build();
+        return project;
     }
 
     @Override
