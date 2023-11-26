@@ -15,4 +15,6 @@ public interface ProjectService {
     void updateProject(Long id, CreateProjectReq req);
 
     void deleteProject(Long id, Long userId);
+
+    void setAutoImport(Long id, Boolean autoImport, String gitAddress, String gitBranch);
 }

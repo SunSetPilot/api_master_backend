@@ -11,6 +11,7 @@ import com.coderalliance.apimaster.model.vo.resq.ApiInfoResp;
 import com.coderalliance.apimaster.model.vo.resq.ApiListResp;
 import com.coderalliance.apimaster.service.ApiService;
 import com.coderalliance.apimaster.service.PermissionService;
+import com.coderalliance.apimaster.service.ProjectService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +31,9 @@ public class ApiController {
 
     @Autowired
     private PermissionService permissionService;
+
+    @Autowired
+    private ProjectService projectService;
 
     @GetMapping("/project/{projectId}")
     public BaseResponse<List<ApiListResp>> getApiList(@PathVariable Long projectId, HttpServletRequest request) {
@@ -145,6 +149,7 @@ public class ApiController {
         try {
             Long currentUserId = (Long) request.getSession().getAttribute("userId");
             permissionService.checkProjectPermission(req.getProjectId(), currentUserId);
+            projectService.setAutoImport(req.getProjectId(), req.getAutoImport(), req.getGitAddress(), req.getGitBranch());
             apiService.batchImportApi(req);
             return BaseResponse.success();
         } catch (PermissionException e){

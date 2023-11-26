@@ -94,4 +94,21 @@ public class ProjectServiceImpl implements ProjectService {
         apiService.deleteApiByProjectId(id);
         permissionService.deleteProjectPermission(id);
     }
+
+    @Override
+    public void setAutoImport(Long id, Boolean autoImport, String gitAddress, String gitBranch) {
+        Project project = projectMapper.selectById(id);
+        if (project == null) {
+            throw new BusinessException("project not exist");
+        }
+        Project newProject = Project.builder()
+                .id(id)
+                .name(project.getName())
+                .ownerId(project.getOwnerId())
+                .autoImport(autoImport)
+                .gitAddress(gitAddress)
+                .gitBranch(gitBranch)
+                .build();
+        projectMapper.updateById(newProject);
+    }
 }
