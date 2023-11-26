@@ -7,8 +7,11 @@ import com.coderalliance.apimaster.model.entity.Api;
 import com.coderalliance.apimaster.model.vo.req.BatchImportApiReq;
 import com.coderalliance.apimaster.model.vo.req.CreateApiReq;
 import com.coderalliance.apimaster.service.ApiService;
+import com.coderalliance.apimaster.service.rpc.ApiScanner;
+import com.coderalliance.apimaster.service.rpc.ScanApiServiceGrpc.ScanApiServiceBlockingStub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import net.devh.boot.grpc.client.inject.GrpcClient;
 
 import java.util.List;
 
@@ -17,6 +20,9 @@ public class ApiServiceImpl implements ApiService {
 
     @Autowired
     private ApiMapper apiMapper;
+
+    @GrpcClient("scan-api-service")
+    private ScanApiServiceBlockingStub scanApiServiceBlockingStub;
 
     @Override
     public List<Api> getApiList(Long projectId) {
@@ -74,6 +80,17 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public void batchImportApi(BatchImportApiReq req) {
+        if (req.getAutoImport()) {
+            ApiScanner.ScanApiRequest scanApiRequest = ApiScanner.ScanApiRequest.newBuilder()
+                    .setProjectId(req.getProjectId())
+                    .setGitAddress(req.getGitAddress())
+                    .setGitBranch(req.getGitBranch())
+                    .build();
+            ApiScanner.ScanApiResponse scanApiResponse = scanApiServiceBlockingStub.scan(scanApiRequest);
+            if (!scanApiResponse.getSuccess()) {
+                throw new BusinessException(scanApiResponse.getMessage());
+            }
+        }
     }
 
     @Override

@@ -2,6 +2,13 @@ server:
   port: 8080
   servlet:
     context-path: /api/v1
+
+grpc:
+  client:
+    scan-api-service:
+      address: static://127.0.0.1:50121
+      negotiationType: PLAINTEXT
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
