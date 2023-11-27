@@ -41,7 +41,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public void createApi(Long projectId, CreateApiReq req) {
+    public Long createApi(Long projectId, CreateApiReq req) {
         Api newApi = Api.builder()
                 .projectId(projectId)
                 .description(req.getDescription())
@@ -54,6 +54,7 @@ public class ApiServiceImpl implements ApiService {
                 .response(req.getResponse())
                 .build();
         apiMapper.insert(newApi);
+        return newApi.getId();
     }
 
     @Override
