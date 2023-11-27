@@ -11,7 +11,7 @@ public interface ApiService {
 
     Api getApi(Long apiId);
 
-    void createApi(Long projectId, CreateApiReq req);
+    Long createApi(Long projectId, CreateApiReq req);
 
     void updateApi(Api oldApi, CreateApiReq req);
 

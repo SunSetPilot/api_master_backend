@@ -9,6 +9,7 @@ import com.coderalliance.apimaster.model.vo.req.BatchImportApiReq;
 import com.coderalliance.apimaster.model.vo.req.CreateApiReq;
 import com.coderalliance.apimaster.model.vo.resq.ApiInfoResp;
 import com.coderalliance.apimaster.model.vo.resq.ApiListResp;
+import com.coderalliance.apimaster.model.vo.resq.CreateApiResp;
 import com.coderalliance.apimaster.service.ApiService;
 import com.coderalliance.apimaster.service.PermissionService;
 import com.coderalliance.apimaster.service.ProjectService;
@@ -88,7 +89,7 @@ public class ApiController {
     }
 
     @PostMapping("")
-    public BaseResponse<Boolean> createApi(@Validated @RequestBody CreateApiReq req, HttpServletRequest request) {
+    public BaseResponse<CreateApiResp> createApi(@Validated @RequestBody CreateApiReq req, HttpServletRequest request) {
         try {
             Long currentUserId = (Long) request.getSession().getAttribute("userId");
             Long projectId = req.getProjectId();
@@ -96,8 +97,8 @@ public class ApiController {
                 throw new BusinessException("project id can not be null");
             }
             permissionService.checkProjectPermission(req.getProjectId(), currentUserId);
-            apiService.createApi(projectId, req);
-            return BaseResponse.success();
+            Long id = apiService.createApi(projectId, req);
+            return BaseResponse.success(CreateApiResp.builder().id(id).build());
         } catch (PermissionException e){
             return BaseResponse.error(StatusCode.FORBIDDEN, e.getMessage());
         } catch (BusinessException e) {
