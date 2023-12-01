@@ -94,7 +94,7 @@ public class ApiController {
             Long currentUserId = (Long) request.getSession().getAttribute("userId");
             Long projectId = req.getProjectId();
             if (projectId == null) {
-                throw new BusinessException("project id can not be null");
+                throw new BusinessException("Project id can not be null!");
             }
             permissionService.checkProjectPermission(req.getProjectId(), currentUserId);
             Long id = apiService.createApi(projectId, req);

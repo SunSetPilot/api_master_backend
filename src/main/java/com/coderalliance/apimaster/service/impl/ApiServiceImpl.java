@@ -35,7 +35,7 @@ public class ApiServiceImpl implements ApiService {
     public Api getApi(Long apiId) {
         Api api = apiMapper.selectById(apiId);
         if (api == null) {
-            throw new BusinessException("api not exist");
+            throw new BusinessException("Api not exist!");
         }
         return api;
     }

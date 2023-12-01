@@ -25,8 +25,10 @@ public class UserServiceImpl implements UserService {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(User::getEmail, email);
         User user = userMapper.selectOne(queryWrapper);
-        if (user == null || !user.getPassword().equals(DigestUtils.md5DigestAsHex(password.getBytes()))) {
-            throw new PermissionException("wrong email or password");
+        if (user == null) {
+            throw new PermissionException("User not exist!");
+        } else if (!user.getPassword().equals(DigestUtils.md5DigestAsHex(password.getBytes()))) {
+            throw new PermissionException("Password is wrong!");
         }
         return user.getId();
     }
@@ -40,7 +42,7 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Long id) {
         User user = userMapper.selectById(id);
         if (user == null) {
-            throw new BusinessException("user not exist");
+            throw new BusinessException("User not exist!");
         } else {
             return user;
         }
@@ -60,7 +62,7 @@ public class UserServiceImpl implements UserService {
         queryWrapper.lambda().eq(User::getEmail, req.getUserEmail());
         User existUser = userMapper.selectOne(queryWrapper);
         if (existUser != null) {
-            throw new BusinessException("user already exist");
+            throw new BusinessException("User already exist!");
         } else {
             User newUser = User.builder()
                     .name(req.getUserName())
@@ -83,7 +85,7 @@ public class UserServiceImpl implements UserService {
                     .build();
             userMapper.updateById(user);
         } else {
-            throw new PermissionException("can not update other user");
+            throw new PermissionException("You can not update other user!");
         }
     }
 }

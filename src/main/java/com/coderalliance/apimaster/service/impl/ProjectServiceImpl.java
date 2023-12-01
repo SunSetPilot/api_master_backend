@@ -38,7 +38,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project getProjectById(Long id) {
         Project project = projectMapper.selectById(id);
         if (project == null) {
-            throw new BusinessException("project not exist");
+            throw new BusinessException("Project not exist!");
         }
         return project;
     }
@@ -63,7 +63,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void updateProject(Long id, CreateProjectReq req) {
         Project oldProject = projectMapper.selectById(id);
         if (oldProject == null) {
-            throw new BusinessException("project not exist");
+            throw new BusinessException("Project not exist!");
         }
         Long ownerId = oldProject.getOwnerId();
         Project project = Project.builder()
@@ -85,10 +85,10 @@ public class ProjectServiceImpl implements ProjectService {
     public void deleteProject(Long id, Long userId) {
         Project project = projectMapper.selectById(id);
         if (project == null) {
-            throw new BusinessException("project not exist");
+            throw new BusinessException("Project not exist!");
         }
         if (!project.getOwnerId().equals(userId)) {
-            throw new PermissionException("you have no permission to delete this project");
+            throw new PermissionException("You have no permission to delete this project!");
         }
         projectMapper.deleteById(id);
         apiService.deleteApiByProjectId(id);
@@ -99,7 +99,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void setAutoImport(Long id, Boolean autoImport, String gitAddress, String gitBranch) {
         Project project = projectMapper.selectById(id);
         if (project == null) {
-            throw new BusinessException("project not exist");
+            throw new BusinessException("Project not exist!");
         }
         Project newProject = Project.builder()
                 .id(id)

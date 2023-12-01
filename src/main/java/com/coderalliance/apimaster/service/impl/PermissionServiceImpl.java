@@ -20,7 +20,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public void checkProjectPermission(Long projectId, Long userId) {
         if (projectId == null || userId == null) {
-            throw new PermissionException("you have no permission to access this project");
+            throw new PermissionException("You have no permission to access this project!");
         }
         QueryWrapper<UserProjectPermission> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
@@ -28,7 +28,7 @@ public class PermissionServiceImpl implements PermissionService {
                 .eq(UserProjectPermission::getUserId, userId);
         UserProjectPermission userProjectPermission = permissionMapper.selectOne(queryWrapper);
         if (userProjectPermission == null) {
-            throw new PermissionException("you have no permission to access this project");
+            throw new PermissionException("You have no permission to access this project!");
         }
     }
 
