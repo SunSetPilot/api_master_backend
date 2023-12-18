@@ -1,0 +1,29 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+grpc:
+  client:
+    scan-api-service:
+      address: static://127.0.0.1:50121
+      negotiationType: PLAINTEXT
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://111.231.169.139:3306/api_master?serverTimezone=GMT%2B8
+    username: root
+    password: coderalliance666!!!
+
+mybatis-plus:
+  configuration:
+    cache-enabled: true
+    use-generated-keys: true
+    default-executor-type: REUSE
+    use-actual-param-name: true
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    org.springframework.boot.autoconfigure: error
